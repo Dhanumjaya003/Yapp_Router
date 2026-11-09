@@ -1,0 +1,21 @@
+TOP = tb_top
+
+all: run
+
+lib:
+	vlib work
+
+compile: lib
+	vlog -sv +incdir+../../yapp/sv ../../yapp/sv/yapp_pkg.sv
+	vlog -sv +incdir+../../Encrypted_Design/channel/sv top_dut.sv
+run: compile
+	vsim -c top_no_dut +UVM_TESTNAME=base_test -do "run -all; quit"
+
+gui: compile
+	vsim $(TOP)
+
+clean:
+	rm -rf work transcript vsim.wlf modelsim.ini
+
+.PHONY: all compile run gui clean lib
+

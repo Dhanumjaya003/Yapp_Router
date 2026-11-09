@@ -1,0 +1,59 @@
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+//`include "./../../yapp/sv/yapp_pkg.sv"
+`include "../sv/yapp.svh"
+`include "../../Encrypted_Design/hbus/sv/hbus_pkg.svp" 
+`include "../../Encrypted_Design/channel/sv/channel_pkg.sv"
+
+`include "router_tb.sv"
+`include "router_test_lib.sv"
+
+`include "./../../Encrypted_Design/Encrypted/yapp_router.svh"
+
+module top_no_dut;
+	
+	bit clock,reset,in_suspend;
+
+	yapp_if vif(clock,rsest);
+  channel_if ch_1(clock,reset);
+  channel_if ch_2(clock,reset);
+  channel_if ch_3(clock,reset);
+  hbus_if h_bus(clock,reset);
+
+  yapp_router dut(.clock(clock),
+    .reset(reset),
+    .error(error),
+    .in_data(vif.in_data),
+    .in_data_vld(vif.in_data_vld),
+    .in_suspend(vif.in_suspend),
+    .hdata(h_bus.hdata),
+    .haddr(h_bus.haddr),
+    .hen(h_bus.hen),
+    .hwr_rd(h_bus.hwr_rd),
+    .data_0(ch_1.data_0),
+    .data_vld_0(ch_1.data_vld_0),
+    .suspend_0(ch_1.suspend_0),
+    .data_1(ch_2.data_1),
+    .data_vld_1(ch_2.data_vld_1),
+    .suspend_1(ch_2.suspend_1),
+    .data_2(ch_2.data_2),
+    .data_vld_2(ch_2.data_vld_2),
+    .suspend_2(ch_2.suspend_2));
+
+	always #5 clock=~clock;
+	initial begin
+		clock=1'b1;
+		reset=1'b1;
+		#10
+		reset=1'b0;
+	end
+	initial begin
+		uvm_config_db#(virtual yapp_if)::set(null,"*","vif",vif);
+    uvm_config_db#(virtual channel_if)::set(null,"*","vif",ch_1);
+    uvm_config_db#(virtual channel_if)::set(null,"*","vif",ch_2);
+    uvm_config_db#(virtual channel_if)::set(null,"*","vif",ch_3);
+    uvm_config_db#(virtual hbus_if)::set(null,"*","vif",h_bus);    
+		run_test();
+	end
+
+endmodule
